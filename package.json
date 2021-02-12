@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@maticnetwork/dagger": "^0.2.0",
+    "dotenv": "^8.2.0",
+    "node-telegram-bot-api": "^0.51.0",
+    "request": "^2.88.2",
+    "request-promise": "^4.2.6",
+    "underscore": "^1.12.0",
+    "web3": "^1.3.4"
+  }
+}
