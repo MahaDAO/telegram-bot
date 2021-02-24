@@ -81,6 +81,24 @@ const main = async () => {
     console.log(data);
     if (!removed) parseBotMessage(action = 'Bonded', data);
   });
+
+  const unbondedFilter = contract.events.Unbonded({
+    room: "latest"
+  });
+
+  unbondedFilter.watch((data, removed) => {
+    console.log(data);
+    if (!removed) parseBotMessage(action = 'Unbonded', data);
+  });
+
+  const withdrawnFilter = contract.events.Withdrawn({
+    room: "latest"
+  });
+
+  withdrawnFilter.watch((data, removed) => {
+    console.log(data);
+    if (!removed) parseBotMessage(action = 'Withdrawn', data);
+  });
 }
 
 
