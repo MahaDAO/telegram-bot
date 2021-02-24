@@ -116,6 +116,8 @@ const parseBotMessage = async (action = 'Bonded', bond) => {
   const priceUSD = await getPriceFromGecko(tokenGeckoId, 'usd');
   const priceETH = await getPriceFromGecko(tokenGeckoId, 'eth');
 
+  console.log(bond);
+
   let messageObj = {
     action: action,
     txHash: bond.transactionHash,
@@ -137,7 +139,8 @@ const main = async () => {
   });
 
   filter.watch((data, removed) => {
-    if (!removed) parseBotMessage(data);
+    console.log(data);
+    if (!removed) parseBotMessage(action = 'Bonded', data);
   });
 }
 
