@@ -18,9 +18,11 @@ const contract = dagger.contract(web3Contract);
  * Some state variables so that variable we need every now and then
  * are assigned and not around only once.
  */
-let token = null;
-let symbol = null;
-let tokenGeckoId = null;
+const vaultGlobalState = {
+  token: null,
+  symbol: null,
+  tokenGeckoId: null
+}
 
 
 /**
@@ -28,19 +30,19 @@ let tokenGeckoId = null;
  */
 const setTokenInfo = async () => {
   // Get the token0 and token1 for the pair.
-  token = await web3Contract.methods.token().call();
+  vaultGlobalState.token = await web3Contract.methods.token().call();
 
   // Create a contract just to get the details info for each
   // of theset tokens.
   // NOTE: currently this contract is just used to extract the token
   // symbols.
-  const tokenContract = new web3.eth.Contract(tokenAbi, token);
+  const tokenContract = new web3.eth.Contract(tokenAbi, vaultGlobalState.token);
 
   // Finally find the symbols of these tokens.
-  symbol = await tokenContract.methods.symbol().call();
+  vaultGlobalState.symbol = await tokenContract.methods.symbol().call();
 
   // Set the coin gecko id for these particular tokens.
-  tokenGeckoId = await getCoinIdFromGecko(symbol);
+  vaultGlobalState.tokenGeckoId = await getCoinIdFromGecko(vaultGlobalState.symbol);
 }
 
 
@@ -50,8 +52,8 @@ const setTokenInfo = async () => {
  * @param {object} bond
  */
 const parseBotMessage = async (action = 'Bonded', bond) => {
-  const priceUSD = await getPriceFromGecko(tokenGeckoId, 'usd');
-  const priceETH = await getPriceFromGecko(tokenGeckoId, 'eth');
+  const priceUSD = await getPriceFromGecko(vaultGlobalState.tokenGeckoId, 'usd');
+  const priceETH = await getPriceFromGecko(vaultGlobalState.tokenGeckoId, 'eth');
 
   console.log(bond);
 
@@ -61,7 +63,7 @@ const parseBotMessage = async (action = 'Bonded', bond) => {
     amount: bond.returnValues.amount,
     usdPrice: priceUSD,
     ethPrice: priceETH,
-    tokenSymbol: symbol
+    tokenSymbol: vaultGlobalState.symbol
   }
 
   sendVaultEventMessage(messageObj);

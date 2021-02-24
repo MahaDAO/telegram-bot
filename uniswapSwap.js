@@ -19,13 +19,13 @@ const contract = dagger.contract(web3Contract);
  * are assigned and not around only once.
  */
 const uniswapSwapGlobalState = {
-  token0 = null,
-  token1 = null,
-  symbol0 = null,
-  symbol1 = null,
-  token0GeckoId = null,
-  token1GeckoId = null,
-  isToken0ProtocolToken = false,
+  token0: null,
+  token1: null,
+  symbol0: null,
+  symbol1: null,
+  token0GeckoId: null,
+  token1GeckoId: null,
+  isToken0ProtocolToken: false,
 }
 
 
