@@ -1,13 +1,12 @@
 const Web3 = require('web3');
 const Dagger = require('@maticnetwork/dagger');
-const TelegramBot = require('node-telegram-bot-api');
-const { getCoinIdFromGecko, getPriceFromGecko } = require('./coingecko');
 
 require('dotenv').config();
 const abi = require('./build/Vault.json').abi;
 const tokenAbi = require('./build/ERC20.json').abi;
+const { sendVaultEventMessage } = require('./telegrambot');
+const { getCoinIdFromGecko, getPriceFromGecko } = require('./coingecko');
 
-const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const dagger = new Dagger("wss://mainnet.dagger.matic.network")
 const web3 = new Web3(`https://mainnet.infura.io/v3/${process.env.INFURA_PROJECT_ID}`);
 
@@ -46,32 +45,6 @@ const setTokenInfo = async () => {
 
 
 /**
- * Send message to the telegram channel.
- * @param {object} details
- */
-const sendMessage = (tradeDetails) => {
-  const messageTemplate = `
-🚀 **${tradeDetails.action} ${Number(web3.utils.fromWei(tradeDetails.amount, 'ether')).toPrecision(6)} ${tradeDetails.tokenSymbol}  on Vault.
-
-
-🟢  1 ${tradeDetails.tokenSymbol}   = ${tradeDetails.usdPrice || '-'}$ | ${tradeDetails.ethPrice || '-'}ETH  🟢
-
-
-📶 Tx 📶 [View](https://etherscan.io/tx/${tradeDetails.txHash})
-📶 Vault 📶 [View](https://etherscan.io/address/${process.env.VAULT_ADDRESS})
-
-
-Join $${tradeDetails.symbol} |  Telegram here (https://t.me/MahaDAO)
-  `
-
-  bot.sendMessage(
-    process.env.CHAT_ID,
-    messageTemplate,
-    { parse_mode: "Markdown" }
-  );
-}
-
-/**
  * Parses the object and converts it into the form that is printable.
  * It is dynamic such that would work if any token is main protocol token that we want to track.
  * @param {object} bond
@@ -91,18 +64,18 @@ const parseBotMessage = async (action = 'Bonded', bond) => {
     tokenSymbol: symbol
   }
 
-  sendMessage(messageObj);
+  sendVaultEventMessage(messageObj);
 }
 
 
 const main = async () => {
   await setTokenInfo();
 
-  const filter = contract.events.Bonded({
+  const bondedFilter = contract.events.Bonded({
     room: "latest"
   });
 
-  filter.watch((data, removed) => {
+  bondedFilter.watch((data, removed) => {
     console.log(data);
     if (!removed) parseBotMessage(action = 'Bonded', data);
   });
