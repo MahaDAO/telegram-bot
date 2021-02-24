@@ -59,9 +59,37 @@ Join $${tradeDetails.tokenSymbol} |  Telegram here (https://t.me/MahaDAO)
 }
 
 
+/**
+ * Send message to the telegram channel.
+ * @param {object} details
+ */
+const sendBoardroomEventMessage = (details) => {
+  const messageTemplate = `
+🚀 **${tradeDetails.action} ${Number(web3.utils.fromWei(tradeDetails.amount, 'ether')).toPrecision(6)} ${tradeDetails.symbol}  on Boardroom.
+
+
+🟢  1 ${tradeDetails.symbol}   = ${tradeDetails.usdPrice || '-'}$ | ${tradeDetails.ethPrice || '-'}ETH  🟢
+
+
+📶 Tx 📶 [View](https://etherscan.io/tx/${tradeDetails.txHash})
+📶 Boardroom 📶 [View](https://etherscan.io/address/${process.env.VAULT_ADDRESS})
+
+
+Join $${tradeDetails.symbol} |  Telegram here (https://t.me/MahaDAO)
+  `
+
+  bot.sendMessage(
+    process.env.CHAT_ID,
+    messageTemplate,
+    { parse_mode: "Markdown" }
+  );
+}
+
+
 
 module.exports = {
   bot,
   sendUniswapSwapMessage,
-  sendVaultEventMessage
+  sendVaultEventMessage,
+  sendBoardroomEventMessage
 }
