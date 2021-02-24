@@ -1,12 +1,11 @@
 const Web3 = require('web3');
-const _ = require('underscore');
-const rp = require('request-promise');
 const Dagger = require('@maticnetwork/dagger');
 const TelegramBot = require('node-telegram-bot-api');
 
 require('dotenv').config();
 const abi = require('./build/VestedVaultBoardroom.json').abi;
 const tokenAbi = require('./build/ERC20.json').abi;
+const { getCoinIdFromGecko, getPriceFromGecko } = require('./coingecko');
 
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const dagger = new Dagger("wss://mainnet.dagger.matic.network")
@@ -20,52 +19,17 @@ const contract = dagger.contract(web3Contract);
  * Some state variables so that variable we need every now and then
  * are assigned and not around only once.
  */
-let token = null;
-let symbol = null;
-let tokenGeckoId = null;
-
-
-/**
- * Get's the coin gecko's identifier coin-id for a coin from Coin Gecko API.
- * @param {string} coinSymbol
- */
-const getCoinIdFromGecko = async (coinSymbol) => {
-  const coinList = JSON.parse(await rp(
-    `https://api.coingecko.com/api/v3/coins/list`
-  ));
-
-  const token = _.filter(coinList, (list) => list.symbol.toLowerCase() === coinSymbol.toLowerCase())
-
-  if (token.length > 1) throw Error('There are more than 1 token with same symbol');
-
-  return token[0].id;
-}
-
-
-/**
- * Get's the price in req. currency from Coin Gecko API.
- * @param {string} coinId
- * @param {string} currency
- */
-const getPriceFromGecko = async (coinId = 'mahadao', currency = 'usd') => {
-  try {
-    const priceInJsonString = await rp(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd,eth`);
-
-    if (!priceInJsonString.includes(coinId)) return null;
-
-    return JSON.parse(priceInJsonString)[coinId][currency];
-  } catch (e) {
-    return null;
-  }
-}
+let tokens = [];
+let symbols = [];
+let tokenGeckoIds = [];
 
 
 /**
  * Set's the global state variable of our script.
  */
-const setTokenInfo = async () => {
+const setTokenInfo = async (contract) => {
   // Get the token0 and token1 for the pair.
-  token = await web3Contract.methods.token().call();
+  token = await contract.methods.token().call();
 
   // Create a contract just to get the details info for each
   // of theset tokens.
@@ -134,14 +98,25 @@ const parseBotMessage = async (action = 'Bonded', bond) => {
 const main = async () => {
   await setTokenInfo();
 
-  const filter = contract.events.RewardPaid({
+  const rewardPaidFilters = contracts.map(contract => contract.events.RewardPaid({
     room: "latest"
-  });
+  }))
 
-  filter.watch((data, removed) => {
-    console.log(data);
-    if (!removed) parseBotMessage(action = 'Bonded', data);
-  });
+  for (const filter of rewardPaidFilters) {
+    filter.watch((data, removed) => {
+      if (!removed) parseBotMessage(action = 'Reward claimed', data);
+    })
+  }
+
+  const rewardAddedFilters = contracts.map(contract => contract.events.RewardAdded({
+    room: "latest"
+  }))
+
+  for (const filter of rewardAddedFilters) {
+    filter.watch((data, removed) => {
+      if (!removed) parseBotMessage(action = 'Rewards added', data);
+    })
+  }
 }
 
 

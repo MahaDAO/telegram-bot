@@ -1,13 +1,11 @@
 const Web3 = require('web3');
-const _ = require('underscore');
-const rp = require('request-promise');
 const Dagger = require('@maticnetwork/dagger');
 const TelegramBot = require('node-telegram-bot-api');
 
 require('dotenv').config();
 const abi = require('./build/UniswapV2Pair.json').abi;
 const tokenAbi = require('./build/UniswapV2ERC20.json').abi;
-
+const { getCoinIdFromGecko, getPriceFromGecko } = require('./coingecko');
 
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 const dagger = new Dagger("wss://mainnet.dagger.matic.network")
@@ -28,23 +26,6 @@ let symbol1 = null;
 let token0GeckoId = null;
 let token1GeckoId = null;
 let isToken0ProtocolToken = false;
-
-
-/**
- * Get's the coin gecko's identifier coin-id for a coin from Coin Gecko API.
- * @param {string} coinSymbol
- */
-const getCoinIdFromGecko = async (coinSymbol) => {
-  const coinList = JSON.parse(await rp(
-    `https://api.coingecko.com/api/v3/coins/list`
-  ));
-
-  const token = _.filter(coinList, (list) => list.symbol.toLowerCase() === coinSymbol.toLowerCase())
-
-  if (token.length > 1) throw Error('There are more than 1 token with same symbol');
-
-  return token[0].id;
-}
 
 
 /**
@@ -72,24 +53,6 @@ const setTokenInfo = async () => {
   // Set the coin gecko id for these particular tokens.
   token0GeckoId = await getCoinIdFromGecko(symbol0);
   token1GeckoId = await getCoinIdFromGecko(symbol1);
-}
-
-
-/**
- * Get's the price in req. currency from Coin Gecko API.
- * @param {string} coinId
- * @param {string} currency
- */
-const getPriceFromGecko = async (coinId = 'mahadao', currency = 'usd') => {
-  try {
-    const priceInJsonString = await rp(`https://api.coingecko.com/api/v3/simple/price?ids=${coinId}&vs_currencies=usd,eth`);
-
-    if (!priceInJsonString.includes(coinId)) return null;
-
-    return JSON.parse(priceInJsonString)[coinId][currency];
-  } catch (e) {
-    return null;
-  }
 }
 
 
