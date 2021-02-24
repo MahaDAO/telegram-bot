@@ -74,25 +74,21 @@ const parseBotMessage = async (action = 'Bonded', bond) => {
 const main = async () => {
   await setTokenInfo();
 
-  const rewardPaidFilters = contracts.map(contract => contract.events.RewardPaid({
+  const rewardPaidFilter = contract.events.RewardPaid({
     room: "latest"
-  }))
+  });
 
-  for (const filter of rewardPaidFilters) {
-    filter.watch((data, removed) => {
-      if (!removed) parseBotMessage(action = 'Reward claimed', data);
-    })
-  }
+  rewardPaidFilter.watch((data, removed) => {
+    if (!removed) parseBotMessage(action = 'Reward claimed', data);
+  })
 
-  const rewardAddedFilters = contracts.map(contract => contract.events.RewardAdded({
+  const rewardAddedFilter = contract.events.RewardAdded({
     room: "latest"
-  }))
+  })
 
-  for (const filter of rewardAddedFilters) {
-    filter.watch((data, removed) => {
-      if (!removed) parseBotMessage(action = 'Rewards added', data);
-    })
-  }
+  rewardAddedFilter.watch((data, removed) => {
+    if (!removed) parseBotMessage(action = 'Rewards added', data);
+  })
 }
 
 
