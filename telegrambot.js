@@ -34,5 +34,6 @@ Join $${tradeDetails.mainTokenSymbol} (${tradeDetails.mainTokenSymbol}) Telegram
 
 
 module.exports = {
-  bot
+  bot,
+  sendUniswapSwapMessage
 }

@@ -2,7 +2,7 @@ const Web3 = require('web3');
 const Dagger = require('@maticnetwork/dagger');
 
 require('dotenv').config();
-const { bot } = require('./telegrambot');
+const { sendUniswapSwapMessage } = require('./telegrambot');
 const abi = require('./build/UniswapV2Pair.json').abi;
 const tokenAbi = require('./build/UniswapV2ERC20.json').abi;
 const { getCoinIdFromGecko, getPriceFromGecko } = require('./coingecko');
