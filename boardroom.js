@@ -32,7 +32,7 @@ const boardroomGlobalState = {
  */
 const setTokenInfo = async (contract) => {
   // Get the token0 and token1 for the pair.
-  boardroomGlobalState.token = await contract.methods.token().call();
+  boardroomGlobalState.token = await web3Contract.methods.token().call();
 
   // Create a contract just to get the details info for each
   // of theset tokens.
