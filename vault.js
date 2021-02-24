@@ -85,12 +85,12 @@ const setTokenInfo = async () => {
  * Send message to the telegram channel.
  * @param {object} details
  */
-const sendMessage = (details) => {
+const sendMessage = (tradeDetails) => {
   const messageTemplate = `
-🚀 **${tradeDetails.action} ${Number(web3.utils.fromWei(tradeDetails.amount, 'ether')).toPrecision(6)} ${tradeDetails.symbol}  on Vault.
+🚀 **${tradeDetails.action} ${Number(web3.utils.fromWei(tradeDetails.amount, 'ether')).toPrecision(6)} ${tradeDetails.tokenSymbol}  on Vault.
 
 
-🟢  1 ${tradeDetails.symbol}   = ${tradeDetails.usdPrice || '-'}$ | ${tradeDetails.ethPrice || '-'}ETH  🟢
+🟢  1 ${tradeDetails.tokenSymbol}   = ${tradeDetails.usdPrice || '-'}$ | ${tradeDetails.ethPrice || '-'}ETH  🟢
 
 
 📶 Tx 📶 [View](https://etherscan.io/tx/${tradeDetails.txHash})
@@ -124,7 +124,7 @@ const parseBotMessage = async (action = 'Bonded', bond) => {
     amount: bond.returnValues.amount,
     usdPrice: priceUSD,
     ethPrice: priceETH,
-    tokenSymbol: symbol0
+    tokenSymbol: symbol
   }
 
   sendMessage(messageObj);
