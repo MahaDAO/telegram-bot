@@ -5,8 +5,8 @@ require('dotenv').config();
 const rp = require('request-promise');
 const moment =  require('moment')
 
-const config = require('./config');
-const abi = require('./abi/VotingEscrow.json');
+const config = require('../../config');
+const votingEscrowAbi = require('../../abi/VotingEscrow.json');
 const { messageTypes } = require('node-telegram-bot-api/src/telegram');
 const mahaImg = './MahaDAO.png'
 
@@ -18,7 +18,7 @@ const mahaXBot = async() => {
 
   // Polygon
   const web3 = new Web3(process.env.MAINNET_MATIC1)
-  var mahaxContract = new web3.eth.Contract(abi, '0x8F2C37D2F8AE7Bce07aa79c768CC03AB0E5ae9aE');
+  var mahaxContract = new web3.eth.Contract(votingEscrowAbi, `${process.env.Matic_VotingEscrow}`);
 
   let mahaToUsdPrice = await rp(`https://api.coingecko.com/api/v3/simple/price?ids=mahadao&vs_currencies=usd`);
   let mahaToEthPrice = await rp(`https://api.coingecko.com/api/v3/simple/price?ids=mahadao&vs_currencies=eth`);
@@ -26,7 +26,7 @@ const mahaXBot = async() => {
   mahaToUsdPrice = Number(JSON.parse(mahaToUsdPrice)['mahadao']['usd']).toPrecision(4)
   let ethToMahaPrice = Number(1 / JSON.parse(mahaToEthPrice)['mahadao']['eth']).toPrecision(6)
 
-  mahaxContract.events.allEvents({address: '0x8F2C37D2F8AE7Bce07aa79c768CC03AB0E5ae9aE'}, function(error, event){ })
+  mahaxContract.events.allEvents({address: `${process.env.Matic_VotingEscrow}`}, function(error, event){ })
   .on('connected', nr => {console.log('connected', nr)})
   .on('data', (event) => {
     console.log('event', event);
