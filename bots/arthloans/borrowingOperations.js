@@ -47,7 +47,7 @@ const borrowingOperations = async() => {
         let ratio = coll.mul(gmu._hex).mul(100).div(debt._hex)
         // let percentRatio = Number( ethers.utils.formatEther( ratio )).toFixed(2)
         let percentRatio = Number((ethers.BigNumber.from(event.returnValues._debt) / ethers.BigNumber.from(event.returnValues._coll)) * 100).toFixed(2)
-        let msgTemplate = `testing operation${event.returnValues.operation}`;
+        let msgTemplate = `Hello Investors`;
 
         if(event.returnValues.operation == '0'){
           msgTemplate = `Loan of *${format.toDisplayNumber(event.returnValues._debt)}* Arth is taken by [${event.returnValues._borrower}](https://polygonscan.com/address/${event.returnValues._borrower}) with collateral of ${format.toDisplayNumber(event.returnValues._coll)} MAHA.`
@@ -78,7 +78,7 @@ const borrowingOperations = async() => {
         let ratio = coll.mul(gmu._hex).mul(100).div(debt._hex)
         // let percentRatio = Number( ethers.utils.formatEther( ratio )).toFixed(2)
         let percentRatio = Number((ethers.BigNumber.from(event.returnValues._debt) / ethers.BigNumber.from(event.returnValues._coll)) * 100).toFixed(2)
-        let msgTemplate = `testing operation${event.returnValues.operation}`;
+        let msgTemplate = `Hello Investors`;
 
         if(event.returnValues.operation == '0'){
           msgTemplate = `Loan of *${format.toDisplayNumber(event.returnValues._debt)}* Arth is taken by [${event.returnValues._borrower}](https://bscscan.com/address/${event.returnValues._borrower}) with collateral of ${format.toDisplayNumber(event.returnValues._coll)} MAHA.`

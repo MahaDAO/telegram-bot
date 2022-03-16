@@ -27,7 +27,7 @@ const troveManage = () => {
       .on('data', event => {
         console.log('troveManagerContract', event)
 
-        let msgTemplate = 'testing'
+        let msgTemplate = 'Hello Investors'
         if(event.event == 'TroveLiquidated'){
           // console.log('TroveLiquidated', event)
 
@@ -59,7 +59,7 @@ const troveManage = () => {
       .on('data', event => {
         console.log('troveManagerContract', event)
 
-        let msgTemplate = 'testing'
+        let msgTemplate = 'Hello Investors'
         if(event.event == 'TroveLiquidated'){
           // console.log('TroveLiquidated', event)
 
