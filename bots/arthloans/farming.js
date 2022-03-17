@@ -82,23 +82,20 @@ const basicStaking = [
 
 const farming = () => {
 
-  // Matic Mumbai
-  // const web3Test = new Web3(process.env.MAINNET_MATIC)
-  // const testStaking = new web3Test.eth.Contract(farmingAbi, `${process.env.MaticMain_BasicStaking}`)
-
-  // console.log('testWMatic', testStaking.events)
-
   basicStaking.map((farm) => {
     new (new Web3(farm.chainWss)).eth.Contract(farmingAbi, `${farm.contrat}`).events.allEvents()
       .on('connected', nr => console.log(`connected ${farm.chainName}`))
       .on('data', async(data) => {
         console.log('data', data)
         let msgTemplate = 'Hello Investors'
+        let baseUrl = ''
+        if(farm.chainName == 'Polygon Mainnet') baseUrl = 'https://polygonscan.com'
+        if(farm.chainName == 'BSC Mainnet') baseUrl = 'https://bscscan.com'
+
         if(data.event == 'Staked'){
-          msgTemplate = `${format.toDisplayNumber(data.returnValues.amount)} ARTH/MAHA LP tokens has been deposited on ${farm.chainName} by ${data.returnValues.user}`
+          msgTemplate = `*${format.toDisplayNumber(data.returnValues.amount)} ARTH/MAHA LP* tokens has been staked on *QuickSwap MAHA/ARTH Staking Program* by [${data.returnValues.user}](${baseUrl}/address/${data.returnValues.user})`
 
-          let msg = await fn.botMessage(msgTemplate, `${farm.chainName}`, data.transactionHash)
-
+          let msg = await fn.farmingBotMsg(msgTemplate, `${farm.chainName}`, data.transactionHash, format.toDisplayNumber(data.returnValues.amount), 'Staked')
           bot.sendMessage(
             process.env.CHAT_ID,
             msg,
@@ -107,8 +104,8 @@ const farming = () => {
         }
         if(data.event == 'Withdrawn'){
           console.log('if Withdrawn')
-          msgTemplate = `${format.toDisplayNumber(data.returnValues.amount)} ARTH/MAHA LP tokens has been withdrawn on ${farm.chainName} by ${data.returnValues.user}`
-          let msg = await fn.botMessage(msgTemplate, `${farm.chainName}`, data.transactionHash)
+          msgTemplate = `*${format.toDisplayNumber(data.returnValues.amount)} ARTH/MAHA LP* tokens has been withdrawn from *QuickSwap MAHA/ARTH Staking Program* by [${data.returnValues.user}](${baseUrl}/address/${data.returnValues.user})`
+          let msg = await fn.farmingBotMsg(msgTemplate, `${farm.chainName}`, data.transactionHash, format.toDisplayNumber(data.returnValues.amount), 'Withdrawn')
 
           bot.sendMessage(
             process.env.CHAT_ID,
@@ -118,8 +115,8 @@ const farming = () => {
         }
         if(data.event == 'RewardPaid'){
           console.log('if RewardPaid')
-          msgTemplate = `${format.toDisplayNumber(data.returnValues.amount)} ARTH/MAHA LP tokens has been claimed as reward on ${farm.chainName} by ${data.returnValues.user}`
-          let msg = await fn.botMessage(msgTemplate, `${farm.chainName}`, data.transactionHash)
+          msgTemplate = `*${format.toDisplayNumber(data.returnValues.reward)} ARTH/MAHA LP tokens* has been claimed as reward on *QuickSwap MAHA/ARTH Staking Program* by [${data.returnValues.user}](${baseUrl}/address/${data.returnValues.user})`
+          let msg = await fn.farmingBotMsg(msgTemplate, `${farm.chainName}`, data.transactionHash, format.toDisplayNumber(data.returnValues.reward), 'RewardPaid')
 
           bot.sendMessage(
             process.env.CHAT_ID,
@@ -131,14 +128,6 @@ const farming = () => {
       .on('changed', changed => console.log('changed', changed))
       .on('error', err => console.log('error farming', err))
   })
-
-  // testStaking.events.allEvents()
-  //   .on('connected', nr => console.log('connected farming'))
-  //   .on('data', data => {
-  //     console.log('data', data)
-  //   })
-  //   .on('changed', changed => console.log('changed', changed))
-  //   .on('error', err => console.log('error farming', err))
 
 }
 
