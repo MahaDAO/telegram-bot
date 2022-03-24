@@ -4,6 +4,8 @@ const { hyperlink, hideLinkEmbed } = require('@discordjs/builders');
 const constants = require('./constants')
 const format = require('../utils/formatValues')
 
+
+
 const botMessage = async(msg, chain, txHash) => {
 
   let chainLink = ''

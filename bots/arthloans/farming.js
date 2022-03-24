@@ -11,6 +11,7 @@ const fn = require('../../utils/fn')
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN)
 const format = require('../../utils/formatValues');
 const constants = require('../../utils/constants')
+const sendDiscordMsg = require('../../utils/sendDiscordMsg')
 
 const commands = [{
   name: 'maha',
@@ -108,10 +109,6 @@ const basicStaking = [
 ]
 
 const farming = async() => {
-
-  // console.log('constants.poolTokenVal()', constants.poolTokenVal())
-
-  console.log('test', format.toDisplayNumber(100000000000000000))
 
   basicStaking.map((farm) => {
 
