@@ -9,8 +9,8 @@ require('dotenv').config({path: '../../.env'});
 const farmingAbi = require('../../abi/BasicStaking.json')
 const fn = require('../../utils/fn')
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN)
-const format = require('../../utils/formatValues')
-
+const format = require('../../utils/formatValues');
+const constants = require('../../utils/constants')
 
 const commands = [{
   name: 'maha',
@@ -44,10 +44,13 @@ const client = new Client({ intents:
   ],
 });
 
-client.on('ready', async() => {
+let channel;
+
+client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
-  // line below giving undefined fetch
-  // console.log('channel', await client.channels.fetch(process.env.DISCORD_CHANNEL_ID))
+
+  channel = client.channels.cache.get(`${process.env.DISCORD_CHANNEL_ID}`)
+
 });
 
 client.on('interactionCreate', async interaction => {
@@ -69,64 +72,108 @@ client.login(process.env.DISCORD_CLIENT_TOKEN); //login bot using token
 
 const basicStaking = [
   {
-    contrat: process.env.MaticMain_BasicStaking,
+    contrat: [
+      {
+        lpTokenName: 'ARTH.usd+3pool',
+        lpTokenAdrs: process.env.MaticMain_BSArthUsd3Pool
+      },
+      {
+        lpTokenName: 'ARTH/USDC LP',
+        lpTokenAdrs: process.env.MaticMain_BSArthUsdc
+      },
+      {
+        lpTokenName: 'ARTH/MAHA LP',
+        lpTokenAdrs: process.env.MaticMain_BSArthMaha
+      }],
     chainWss: process.env.MAINNET_MATIC,
     chainName: 'Polygon Mainnet'
   },
   {
-    contrat: process.env.BscMain_BasicStaking,
+    contrat: [
+      {
+        lpTokenName: 'ARTH.usd+3eps',
+        lpTokenAdrs: process.env.BscMain_BSArthUsd3eps
+      },
+      {
+        lpTokenName: 'ARTH/BUSD LP',
+        lpTokenAdrs: process.env.BscMain_BSArthBusdc
+      },
+      {
+        lpTokenName: 'ARTH/MAHA LP',
+        lpTokenAdrs: process.env.BscMain_BSArthMaha
+      }],
     chainWss: process.env.MAINNET_BSC,
     chainName: 'BSC Mainnet'
   }
 ]
 
-const farming = () => {
+const farming = async() => {
+
+  // console.log('constants.poolTokenVal()', constants.poolTokenVal())
+
+  console.log('test', format.toDisplayNumber(100000000000000000))
 
   basicStaking.map((farm) => {
-    new (new Web3(farm.chainWss)).eth.Contract(farmingAbi, `${farm.contrat}`).events.allEvents()
-      .on('connected', nr => console.log(`connected ${farm.chainName}`))
-      .on('data', async(data) => {
-        console.log('data', data)
-        let msgTemplate = 'Hello Investors'
-        let baseUrl = ''
-        if(farm.chainName == 'Polygon Mainnet') baseUrl = 'https://polygonscan.com'
-        if(farm.chainName == 'BSC Mainnet') baseUrl = 'https://bscscan.com'
 
-        if(data.event == 'Staked'){
-          msgTemplate = `*${format.toDisplayNumber(data.returnValues.amount)} ARTH/MAHA LP* tokens has been staked on *QuickSwap MAHA/ARTH Staking Program* by [${data.returnValues.user}](${baseUrl}/address/${data.returnValues.user})`
+    farm.contrat.map((cont) => {
+      new (new Web3(farm.chainWss)).eth.Contract(farmingAbi, `${cont.lpTokenAdrs}`).events.allEvents()
+        .on('connected', nr => console.log(`connected ${farm.chainName} ${cont.lpTokenName}`))
+        .on('data', async(data) => {
+          console.log('data', data)
+          let msgTemplate = 'Hello Investors'
+          let baseUrl = ''
+          if(farm.chainName == 'Polygon Mainnet') baseUrl = 'https://polygonscan.com'
+          if(farm.chainName == 'BSC Mainnet') baseUrl = 'https://bscscan.com'
 
-          let msg = await fn.farmingBotMsg(msgTemplate, `${farm.chainName}`, data.transactionHash, format.toDisplayNumber(data.returnValues.amount), 'Staked')
-          bot.sendMessage(
-            process.env.CHAT_ID,
-            msg,
-            { parse_mode: "Markdown" }
-          )
-        }
-        if(data.event == 'Withdrawn'){
-          console.log('if Withdrawn')
-          msgTemplate = `*${format.toDisplayNumber(data.returnValues.amount)} ARTH/MAHA LP* tokens has been withdrawn from *QuickSwap MAHA/ARTH Staking Program* by [${data.returnValues.user}](${baseUrl}/address/${data.returnValues.user})`
-          let msg = await fn.farmingBotMsg(msgTemplate, `${farm.chainName}`, data.transactionHash, format.toDisplayNumber(data.returnValues.amount), 'Withdrawn')
+          if(data.event == 'Staked'){
+            // msgTemplate = `*${format.toDisplayNumber(data.returnValues.amount)} ${cont.lpTokenName}* tokens has been staked on *QuickSwap MAHA/ARTH Staking Program* by [${data.returnValues.user}](${baseUrl}/address/${data.returnValues.user})`
+            console.log('data', data.returnValues.amount)
+            let msg = await fn.farmingTelgramMsg(data, `${farm.chainName}`, cont.lpTokenName, 'Staked')
+            console.log('msg', msg)
 
-          bot.sendMessage(
-            process.env.CHAT_ID,
-            msg,
-            { parse_mode: "Markdown" }
-          )
-        }
-        if(data.event == 'RewardPaid'){
-          console.log('if RewardPaid')
-          msgTemplate = `*${format.toDisplayNumber(data.returnValues.reward)} ARTH/MAHA LP tokens* has been claimed as reward on *QuickSwap MAHA/ARTH Staking Program* by [${data.returnValues.user}](${baseUrl}/address/${data.returnValues.user})`
-          let msg = await fn.farmingBotMsg(msgTemplate, `${farm.chainName}`, data.transactionHash, format.toDisplayNumber(data.returnValues.reward), 'RewardPaid')
+            bot.sendMessage(
+              process.env.CHAT_ID,
+              msg,
+              { parse_mode: "Markdown", disable_web_page_preview: true }
+            )
+            let discordMsg = await fn.farmingDiscordMsg(data, `${farm.chainName}`, cont.lpTokenName, 'Staked')
+            console.log('discordMsg', discordMsg)
+            channel.send({embeds: [discordMsg]})
+          }
+          if(data.event == 'Withdrawn'){
+            console.log('if Withdrawn')
+            // msgTemplate = `*${format.toDisplayNumber(data.returnValues.amount)} ARTH/MAHA LP* tokens has been withdrawn from *QuickSwap MAHA/ARTH Staking Program* by [${data.returnValues.user}](${baseUrl}/address/${data.returnValues.user})`
+            let msg = await fn.farmingTelgramMsg(data, `${farm.chainName}`, cont.lpTokenName, 'Withdrawn')
+            console.log('msg', msg)
+            bot.sendMessage(
+              process.env.CHAT_ID,
+              msg,
+              { parse_mode: "Markdown", disable_web_page_preview: true }
+            )
+            let discordMsg = await fn.farmingDiscordMsg(data, `${farm.chainName}`, cont.lpTokenName,  'Withdrawn')
+            console.log('discordMsg', discordMsg)
 
-          bot.sendMessage(
-            process.env.CHAT_ID,
-            msg,
-            { parse_mode: "Markdown" }
-          )
-        }
-      })
-      .on('changed', changed => console.log('changed', changed))
-      .on('error', err => console.log('error farming', err))
+            channel.send({embeds: [discordMsg]})
+          }
+          if(data.event == 'RewardPaid'){
+            console.log('if RewardPaid')
+            // msgTemplate = `*${format.toDisplayNumber(data.returnValues.reward)} MAHA tokens* has been claimed as reward from *QuickSwap MAHA/ARTH Staking Program* by [${data.returnValues.user}](${baseUrl}/address/${data.returnValues.user})`
+            let msg = await fn.farmingTelgramMsg(data, `${farm.chainName}`, cont.lpTokenName, 'RewardPaid')
+
+            bot.sendMessage(
+              process.env.CHAT_ID,
+              msg,
+              { parse_mode: "Markdown", disable_web_page_preview: true}
+            )
+            let discordMsg = await fn.farmingDiscordMsg(data, `${farm.chainName}`, cont.lpTokenName, 'RewardPaid')
+            channel.send({embeds: [discordMsg]})
+
+          }
+        })
+        .on('changed', changed => console.log('changed', changed))
+        .on('error', err => console.log('error farming', err))
+    })
+
   })
 
 }

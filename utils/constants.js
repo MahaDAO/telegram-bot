@@ -38,10 +38,17 @@ const tvlAprFn = async() => {
   return tvlAprObj
 }
 
+const poolTokenVal = async() => {
+  const data = JSON.parse(await rp('https://api.arthcoin.com/apy/lp'))
+
+  return data
+}
+
 module.exports = {
   getMahaPrice,
   getEthToMahaPrice,
   getArthToUSD,
-  tvlAprFn
+  tvlAprFn,
+  poolTokenVal
 }
 

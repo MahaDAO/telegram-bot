@@ -1,10 +1,15 @@
 const Numeral = require('numeral');
+const ethers = require('ethers')
+const {BigNumber} = require('ethers')
+
 
 module.exports = {
   toDisplayNumber: (value) => {
-    return Numeral(value / 10**18, 18, 6).format('0,0.000')
 
-  }
+    const bn = BigNumber.from(`${value}`);
+    return ethers.utils.formatEther(bn)
+
+  },
 }
 
 
