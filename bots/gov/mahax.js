@@ -114,7 +114,9 @@ const mahaXBot = async() => {
         }
 
         msgTemplate = `
-        🚀  *${event.returnValues.value / 10**18} $(${(event.returnValues.value / 10**18) * mahaToUsdPrice}) MAHA* has been locked till *${moment(event.returnValues.locktime * 1000).format('DD MMM YYYY')}* by [${event.returnValues.provider}](https://polygonscan.com/address/${event.returnValues.provider})
+🚀  Governance is in swing...
+
+*${event.returnValues.value / 10**18} $(${(event.returnValues.value / 10**18) * mahaToUsdPrice}) MAHA* has been locked till *${moment(event.returnValues.locktime * 1000).format('DD MMM YYYY')}* by [${event.returnValues.provider}](https://polygonscan.com/address/${event.returnValues.provider})
 
 ${greenDots}
 
@@ -124,7 +126,9 @@ ${greenDots}
 `
       }else if(event.returnValues.type == 3){
         msgTemplate = `
-        🚀  The locking period is extended till *${moment(event.returnValues.locktime * 1000).format('DD MMM YYYY')}* by [${event.returnValues.provider}](https://polygonscan.com/address/${event.returnValues.provider})
+🚀  Governance is in swing...
+
+The locking period is extended till *${moment(event.returnValues.locktime * 1000).format('DD MMM YYYY')}* by [${event.returnValues.provider}](https://polygonscan.com/address/${event.returnValues.provider})
 
 *1 MAHA* = *$${mahaToUsdPrice}*
 *1 ETH* = *${ethToMahaPrice} MAHA*
@@ -140,7 +144,9 @@ ${greenDots}
         }
 
         msgTemplate = `
-        🚀  *${event.returnValues.value / 10**18} $(${(event.returnValues.value / 10**18) * mahaToUsdPrice}) MAHA* has been withdrawn by [${event.returnValues.provider}](https://polygonscan.com/address/${event.returnValues.provider})
+🚀  Governance is in swing...
+
+*${event.returnValues.value / 10**18} $(${(event.returnValues.value / 10**18) * mahaToUsdPrice}) MAHA* has been withdrawn by [${event.returnValues.provider}](https://polygonscan.com/address/${event.returnValues.provider})
 
 *1 MAHA* = *$${mahaToUsdPrice}*
 *1 ETH* = *${ethToMahaPrice} MAHA*
@@ -156,7 +162,7 @@ ${greenDots}
 
       const exampleEmbed = new MessageEmbed()
         .setColor('#F07D55')
-        .setTitle('🚀  Governance is in swing...')
+        // .setTitle('🚀  Governance is in swing...')
         .setDescription(msgTemplate)
 
       channel.send({embeds: [exampleEmbed]})

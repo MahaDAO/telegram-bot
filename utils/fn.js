@@ -1,3 +1,4 @@
+const Numeral = require('numeral');
 const { MessageEmbed } = require('discord.js');
 const { hyperlink, hideLinkEmbed } = require('@discordjs/builders');
 
@@ -76,16 +77,19 @@ const farmingTelgramMsg = async(data, chain, lpTokenName, operation) => {
   let url = `${chainLink}/address/${farmingUser}`
 
   if(operation == 'Staked'){
-    farmVal = format.toDisplayNumber(data.returnValues.amount)
-    msg = `*${farmVal} ${poolLPName} ($${(farmVal * poolLPVal).toFixed(2)})* tokens has been staked on *QuickSwap MAHA/ARTH Staking Program* by [${farmingUser}](${url})}`
+    if(lpTokenName === 'ARTH/USDC LP') farmVal = format.toDisplayNumber(data.returnValues.amount * 1000000)
+    else farmVal = format.toDisplayNumber(data.returnValues.amount)
+    msg = `*${farmVal} ${poolLPName} ($${Numeral(farmVal * poolLPVal).format('0.000')})* tokens has been staked on *QuickSwap MAHA/ARTH Staking Program* by [${farmingUser}](${url})}`
   }
   if(operation === 'Withdrawn'){
-    farmVal = format.toDisplayNumber(data.returnValues.amount)
-    msg = `*${farmVal} ${poolLPName} ($${(farmVal * poolLPVal).toFixed(2)})* tokens has been withdrawn from *QuickSwap MAHA/ARTH Staking Program* by [${farmingUser}](${url})`
+    if(lpTokenName === 'ARTH/USDC LP') farmVal = format.toDisplayNumber(data.returnValues.amount * 1000000)
+    else farmVal = format.toDisplayNumber(data.returnValues.amount)
+    msg = `*${farmVal} ${poolLPName} ($${Numeral(farmVal * poolLPVal).format('0.000')})* tokens has been withdrawn from *QuickSwap MAHA/ARTH Staking Program* by [${farmingUser}](${url})`
   }
   if(operation == 'RewardPaid'){
     farmVal = format.toDisplayNumber(data.returnValues.reward)
-    msg = `*${format.toDisplayNumber(data.returnValues.reward)} MAHA* tokens has been claimed as reward from *QuickSwap MAHA/ARTH Staking Program* by [${farmingUser}](${url})`
+    console.log('RewardPaid', farmVal, data.returnValues.reward)
+    msg = `*${farmVal} MAHA* tokens has been claimed as reward from *QuickSwap MAHA/ARTH Staking Program* by [${farmingUser}](${url})`
   }
 
   let noOfTotalDots = Math.ceil((farmVal * poolLPVal) / 100)
@@ -109,7 +113,7 @@ ${
 
 *1 MAHA* = *$${await constants.getMahaPrice()}*
 *1 ARTH* = *$${await constants.getArthToUSD()}*
-*1 ${poolLPName} Token = $${poolLPVal.toFixed(2)}*
+*1 ${poolLPName} Token = $${Numeral(poolLPVal).format('0.000')}*
 
 TVL in this pool: *$${tvl}*
 New APR: *${apr}%*
@@ -136,8 +140,8 @@ const farmingDiscordMsg = async (data, chain, lpTokenName, operation) => {
   if(chain == 'Polygon Mainnet'){
     chainLink = 'https://polygonscan.com'
     mahaToken = '0xedd6ca8a4202d4a36611e2fff109648c4863ae19'
-    tvl = tvlApr.polygon.tvl || 1
-    apr = tvlApr.polygon.apr || 1
+    tvl = tvlApr.polygon.tvl
+    apr = tvlApr.polygon.apr
     swapName = 'QuickSwap'
 
     if(lpTokenName == 'ARTH.usd+3pool')
@@ -167,17 +171,18 @@ const farmingDiscordMsg = async (data, chain, lpTokenName, operation) => {
   let url = `${chainLink}/address/${farmingUser}`
 
   if(operation == 'Staked'){
-    console.log('farmVal * poolLPVal', farmVal * poolLPVal, data.returnValues.amount)
-    farmVal = format.toDisplayNumber(data.returnValues.amount)
-    msg = `**${farmVal} ${poolLPName} ($${(farmVal * poolLPVal).toFixed(2)})** tokens has been staked on **${swapName} ${poolLPName} Staking Program** by ${hyperlink(`${farmingUser}`, url)}`
+    if(lpTokenName === 'ARTH/USDC LP') farmVal = format.toDisplayNumber(data.returnValues.amount * 1000000)
+    else farmVal = format.toDisplayNumber(data.returnValues.amount)
+    msg = `**${farmVal} ${poolLPName} ($${Numeral(farmVal * poolLPVal).format('0.000')})** tokens has been staked on **${swapName} ${poolLPName} Staking Program** by ${hyperlink(`${farmingUser}`, url)}`
   }
   if(operation == 'Withdrawn'){
-    farmVal = format.toDisplayNumber(data.returnValues.amount)
-    msg = `**${farmVal} ${poolLPName} ($${(farmVal * poolLPVal).toFixed(2)})** tokens has been withdrawn from **${swapName} ${poolLPName} Staking Program** by ${hyperlink(`${farmingUser}`, url)}`
+    if(lpTokenName === 'ARTH/USDC LP') farmVal = format.toDisplayNumber(data.returnValues.amount * 1000000)
+    else farmVal = format.toDisplayNumber(data.returnValues.amount)
+    msg = `**${farmVal} ${poolLPName} ($${Numeral(farmVal * poolLPVal).format('0.000')})** tokens has been withdrawn from **${swapName} ${poolLPName} Staking Program** by ${hyperlink(`${farmingUser}`, url)}`
   }
   if(operation == 'RewardPaid'){
     farmVal = format.toDisplayNumber(data.returnValues.reward)
-    msg = `**${format.toDisplayNumber(data.returnValues.reward)} MAHA** tokens has been claimed as reward from **${swapName} ${poolLPName} Staking Program** by ${hyperlink(`${farmingUser}`, url)}`
+    msg = `**${farmVal} MAHA** tokens has been claimed as reward from **${swapName} ${poolLPName} Staking Program** by ${hyperlink(`${farmingUser}`, url)}`
   }
 
   let noOfTotalDots = Math.ceil((farmVal * poolLPVal) / 100)
@@ -203,7 +208,7 @@ ${
 
 **1 MAHA** = **$${await constants.getMahaPrice()}**
 **1 ARTH** = **$${await constants.getArthToUSD()}**
-**1 ${poolLPName} Token = $${poolLPVal.toFixed(2)}**
+**1 ${poolLPName} Token = $${Numeral(poolLPVal).format('0.000')}**
 
 TVL in this pool: **$${tvl}**
 New APR: **${apr}%**
