@@ -104,7 +104,7 @@ const mahaXBot = async() => {
     console.log('event', event);
     let msgTemplate = '';
 
-    if(event.event == 'Deposit' ){
+    if(event.event == 'Deposit'){
       if(event.returnValues.type == 1 || event.returnValues.type == 2){
         let noOfGreenDots = Math.ceil(Number((event.returnValues.value / 10**18) * mahaToUsdPrice) / 100)
 
