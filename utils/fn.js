@@ -31,6 +31,330 @@ ${msg}
   return msgToReturn
 }
 
+const troveTelegramMsg = async(data, chain, poolName, operation) => {
+  let chainLink = ''
+  let tvl = ''
+  let apr = ''
+  let msg = ''
+  let poolLPVal = 0
+  let swapName
+
+  let tvlApr = await constants.tvlAprFn()
+  let lpPoolValObj = await constants.poolTokenVal()
+
+  if(chain == 'Polygon Mainnet'){
+    chainLink = 'https://polygonscan.com'
+    mahaToken = '0xedd6ca8a4202d4a36611e2fff109648c4863ae19'
+    tvl = tvlApr.polygon.tvl
+    apr = tvlApr.polygon.apr
+    swapName = 'QuickSwap'
+
+    // if(poolName == 'Weth')
+    //   poolLPVal = lpPoolValObj.arthUsdc3Polygon
+    // if(poolName === 'Wdai')
+    //   poolLPVal = lpPoolValObj.arthUsdcPolygon
+    // if(poolName === 'Wmatic')
+    //   poolLPVal = lpPoolValObj.arthMahaPolygon
+  }
+  if(chain == 'BSC Mainnet'){
+    chainLink = 'https://bscscan.com'
+    mahaToken = '0xCE86F7fcD3B40791F63B86C3ea3B8B355Ce2685b'
+    tvl = tvlApr.bsc.tvl
+    apr = tvlApr.bsc.apr
+    swapName = 'PanCakeSwap'
+
+    // if(poolName == 'Maha')
+    //   poolLPVal = lpPoolValObj.arthUsdc3Bsc
+    // if(poolName === 'Wbnb')
+    //   poolLPVal = lpPoolValObj.arthBusdBsc
+    // if(poolName === 'Wbusd')
+    //   poolLPVal = lpPoolValObj.arthMahaBsc
+  }
+
+  let farmVal
+  let farmingUser = data.returnValues.user
+  let url = `${chainLink}/address/${farmingUser}`
+
+  if(data.event == 'TroveLiquidated'){
+    farmVal = format.toDisplayNumber(data.returnValues._coll)
+    msg = `${farmVal} MAHA has been liquidated with the debt of ${format.toDisplayNumber(data.returnValues._debt)} Arth.`
+  }
+  if(data.event == 'Redemption'){
+    farmVal = format.toDisplayNumber(data.returnValues._actualLUSDAmount)
+    msg = `${farmVal} ARTH has been redeemed for ${format.toDisplayNumber(data.returnValues._ETHSent)} MAHA`
+  }
+
+  let noOfTotalDots = Math.ceil(farmVal / 100)
+  let dots = ''
+  for(let i = 0; i < noOfTotalDots; i++){
+    if(operation == 'TroveLiquidated' || operation == 'Redemption')
+      dots = '🟢 '  + dots;
+    else dots = ''  + dots;
+  }
+
+  let msgToReturn = `
+🚀  Arth Loan is in swing...
+
+${msg}
+
+${
+  dots.length ? dots : ''
+}
+
+*1 MAHA* = *$${await constants.getMahaPrice()}*
+*1 ARTH* = *$${await constants.getArthToUSD()}*
+
+[📶 Transaction Hash 📶 ](${chainLink}/tx/${data.transactionHash})
+  `
+
+  return msgToReturn
+
+}
+
+const troveDiscordMsg = async(data, chain, poolName, operation) => {
+  let chainLink = ''
+  let tvl = ''
+  let apr = ''
+  let msg = ''
+  let poolLPVal = 0
+  let poolLPName = poolName
+  let swapName
+
+  let tvlApr = await constants.tvlAprFn()
+  let lpPoolValObj = await constants.poolTokenVal()
+
+  if(chain == 'Polygon Mainnet'){
+    chainLink = 'https://polygonscan.com'
+    mahaToken = '0xedd6ca8a4202d4a36611e2fff109648c4863ae19'
+    tvl = tvlApr.polygon.tvl
+    apr = tvlApr.polygon.apr
+    swapName = 'QuickSwap'
+
+    // if(poolName == 'Weth')
+    //   poolLPVal = lpPoolValObj.arthUsdc3Polygon
+    // if(poolName === 'Wdai')
+    //   poolLPVal = lpPoolValObj.arthUsdcPolygon
+    // if(poolName === 'Wmatic')
+    //   poolLPVal = lpPoolValObj.arthMahaPolygon
+  }
+  if(chain == 'BSC Mainnet'){
+    chainLink = 'https://bscscan.com'
+    mahaToken = '0xCE86F7fcD3B40791F63B86C3ea3B8B355Ce2685b'
+    tvl = tvlApr.bsc.tvl
+    apr = tvlApr.bsc.apr
+    swapName = 'PanCakeSwap'
+
+    // if(poolName == 'Maha')
+    //   poolLPVal = lpPoolValObj.arthUsdc3Bsc
+    // if(poolName === 'Wbnb')
+    //   poolLPVal = lpPoolValObj.arthBusdBsc
+    // if(poolName === 'Wbusd')
+    //   poolLPVal = lpPoolValObj.arthMahaBsc
+  }
+
+  let farmVal
+  let farmingUser = data.returnValues.user
+  let url = `${chainLink}/address/${farmingUser}`
+
+
+  if(data.event == 'TroveLiquidated'){
+    msg = `${format.toDisplayNumber(data.returnValues._coll)} MAHA has been liquidated with the debt of ${format.toDisplayNumber(data.returnValues._debt)} Arth.`
+  }
+  if(data.event == 'Redemption'){
+    msg = `${format.toDisplayNumber(data.returnValues._actualLUSDAmount)} ARTH has been redeemed for ${format.toDisplayNumber(data.returnValues._ETHSent)} MAHA`
+  }
+
+  let noOfTotalDots = Math.ceil(farmVal / 100)
+  let dots = ''
+  for(let i = 0; i < noOfTotalDots; i++){
+    if(operation == 'TroveLiquidated' || operation == 'Redemption')
+      dots = '🟢 '  + dots;
+    else dots = ''  + dots;
+  }
+
+  let msgToReturn = `
+${msg}
+
+${
+  dots.length ? dots : ''
+}
+
+*1 MAHA* = *$${await constants.getMahaPrice()}*
+*1 ARTH* = *$${await constants.getArthToUSD()}*
+
+[📶 Transaction Hash 📶 ](${chainLink}/tx/${data.transactionHash})
+  `
+
+  const exampleEmbed = new MessageEmbed()
+    .setColor('#F07D55')
+    .setTitle('🚀  Arth Loan is in swing...')
+    .setDescription(msgToReturn)
+
+  return exampleEmbed
+
+
+}
+
+const borrowOpTelegramMsg = async(data, chain, collName) => {
+  let chainLink = ''
+  let tvl = ''
+  let apr = ''
+  let msg = ''
+  let poolLPVal = 0
+  let swapName
+
+  let tvlApr = await constants.tvlAprFn()
+  let lpPoolValObj = await constants.poolTokenVal()
+
+  if(chain == 'Polygon Mainnet'){
+    chainLink = 'https://polygonscan.com'
+    mahaToken = '0xedd6ca8a4202d4a36611e2fff109648c4863ae19'
+    tvl = tvlApr.polygon.tvl
+    apr = tvlApr.polygon.apr
+    swapName = 'QuickSwap'
+
+    // if(poolName == 'Weth')
+    //   poolLPVal = lpPoolValObj.arthUsdc3Polygon
+    // if(poolName === 'Wdai')
+    //   poolLPVal = lpPoolValObj.arthUsdcPolygon
+    // if(poolName === 'Wmatic')
+    //   poolLPVal = lpPoolValObj.arthMahaPolygon
+  }
+  if(chain == 'BSC Mainnet'){
+    chainLink = 'https://bscscan.com'
+    mahaToken = '0xCE86F7fcD3B40791F63B86C3ea3B8B355Ce2685b'
+    tvl = tvlApr.bsc.tvl
+    apr = tvlApr.bsc.apr
+    swapName = 'PanCakeSwap'
+
+    // if(poolName == 'Maha')
+    //   poolLPVal = lpPoolValObj.arthUsdc3Bsc
+    // if(poolName === 'Wbnb')
+    //   poolLPVal = lpPoolValObj.arthBusdBsc
+    // if(poolName === 'Wbusd')
+    //   poolLPVal = lpPoolValObj.arthMahaBsc
+  }
+
+  let farmVal
+  let farmingUser = data.returnValues.user
+  let url = `${chainLink}/address/${farmingUser}`
+
+  if(data.returnValues.operation == '0'){
+    msg = `Loan of *${format.toDisplayNumber(data.returnValues._debt)}* Arth is taken by [${data.returnValues._borrower}](https://polygonscan.com/address/${data.returnValues._borrower}) with collateral of ${format.toDisplayNumber(data.returnValues._coll)} ${collName}.`
+  }
+  if(data.returnValues.operation == '1'){
+    msg = `A Loan has been closed by [${data.returnValues._borrower}](https://polygonscan.com/address/${data.returnValues._borrower})`
+  }
+  if(data.returnValues.operation == '2'){
+    msg = `A Loan has been modified by [${data.returnValues._borrower}](https://polygonscan.com/address/${data.returnValues._borrower})`
+  }
+
+  // let noOfTotalDots = Math.ceil(farmVal / 100)
+  // let dots = ''
+  // for(let i = 0; i < noOfTotalDots; i++){
+  //   if(operation == 'TroveLiquidated' || operation == 'Redemption')
+  //     dots = '🟢 '  + dots;
+  //   else dots = ''  + dots;
+  // }
+
+  let msgToReturn = `
+🚀  Arth Loan is in swing...
+
+${msg}
+
+*1 MAHA* = *$${await constants.getMahaPrice()}*
+*1 ARTH* = *$${await constants.getArthToUSD()}*
+
+[📶 Transaction Hash 📶 ](${chainLink}/tx/${data.transactionHash})
+  `
+
+  return msgToReturn
+
+}
+
+const borrowOpDiscordMsg = async(data, chain, collName) => {
+
+  let chainLink = ''
+  let tvl = ''
+  let apr = ''
+  let msg = ''
+  let poolLPVal = 0
+  let swapName
+
+  let tvlApr = await constants.tvlAprFn()
+  let lpPoolValObj = await constants.poolTokenVal()
+
+  if(chain == 'Polygon Mainnet'){
+    chainLink = 'https://polygonscan.com'
+    mahaToken = '0xedd6ca8a4202d4a36611e2fff109648c4863ae19'
+    tvl = tvlApr.polygon.tvl
+    apr = tvlApr.polygon.apr
+    swapName = 'QuickSwap'
+
+    // if(poolName == 'Weth')
+    //   poolLPVal = lpPoolValObj.arthUsdc3Polygon
+    // if(poolName === 'Wdai')
+    //   poolLPVal = lpPoolValObj.arthUsdcPolygon
+    // if(poolName === 'Wmatic')
+    //   poolLPVal = lpPoolValObj.arthMahaPolygon
+  }
+  if(chain == 'BSC Mainnet'){
+    chainLink = 'https://bscscan.com'
+    mahaToken = '0xCE86F7fcD3B40791F63B86C3ea3B8B355Ce2685b'
+    tvl = tvlApr.bsc.tvl
+    apr = tvlApr.bsc.apr
+    swapName = 'PanCakeSwap'
+
+    // if(poolName == 'Maha')
+    //   poolLPVal = lpPoolValObj.arthUsdc3Bsc
+    // if(poolName === 'Wbnb')
+    //   poolLPVal = lpPoolValObj.arthBusdBsc
+    // if(poolName === 'Wbusd')
+    //   poolLPVal = lpPoolValObj.arthMahaBsc
+  }
+
+  let farmVal
+  let farmingUser = data.returnValues.user
+  let url = `${chainLink}/address/${farmingUser}`
+
+  if(data.returnValues.operation == '0'){
+    msg = `Loan of *${format.toDisplayNumber(data.returnValues._debt)}* Arth is taken by [${data.returnValues._borrower}](https://polygonscan.com/address/${data.returnValues._borrower}) with collateral of ${format.toDisplayNumber(data.returnValues._coll)} ${collName}.`
+  }
+  if(data.returnValues.operation == '1'){
+    msg = `A Loan has been closed by [${data.returnValues._borrower}](https://polygonscan.com/address/${data.returnValues._borrower})`
+  }
+  if(data.returnValues.operation == '2'){
+    msg = `A Loan has been modified by [${data.returnValues._borrower}](https://polygonscan.com/address/${data.returnValues._borrower})`
+  }
+
+  // let noOfTotalDots = Math.ceil(farmVal / 100)
+  // let dots = ''
+  // for(let i = 0; i < noOfTotalDots; i++){
+  //   if(operation == 'TroveLiquidated' || operation == 'Redemption')
+  //     dots = '🟢 '  + dots;
+  //   else dots = ''  + dots;
+  // }
+
+  let msgToReturn = `
+🚀  Arth Loan is in swing...
+
+${msg}
+
+*1 MAHA* = *$${await constants.getMahaPrice()}*
+*1 ARTH* = *$${await constants.getArthToUSD()}*
+
+[📶 Transaction Hash 📶 ](${chainLink}/tx/${data.transactionHash})
+  `
+
+  const exampleEmbed = new MessageEmbed()
+    .setColor('#F07D55')
+    .setTitle('🚀  Arth Loan is in swing...')
+    .setDescription(msgToReturn)
+
+  return exampleEmbed
+
+}
+
 const farmingTelgramMsg = async(data, chain, lpTokenName, operation) => {
   let chainLink = ''
   let tvl = ''
@@ -79,17 +403,17 @@ const farmingTelgramMsg = async(data, chain, lpTokenName, operation) => {
   if(operation == 'Staked'){
     if(lpTokenName === 'ARTH/USDC LP') farmVal = format.toDisplayNumber(data.returnValues.amount * 1000000)
     else farmVal = format.toDisplayNumber(data.returnValues.amount)
-    msg = `*${farmVal} ${poolLPName} ($${Numeral(farmVal * poolLPVal).format('0.000')})* tokens has been staked on *QuickSwap MAHA/ARTH Staking Program* by [${farmingUser}](${url})}`
+    msg = `*${farmVal} ${poolLPName} ($${Numeral(farmVal * poolLPVal).format('0.000')})* tokens has been staked on **${swapName} ${poolLPName} Staking Program** by [${farmingUser}](${url})}`
   }
   if(operation === 'Withdrawn'){
     if(lpTokenName === 'ARTH/USDC LP') farmVal = format.toDisplayNumber(data.returnValues.amount * 1000000)
     else farmVal = format.toDisplayNumber(data.returnValues.amount)
-    msg = `*${farmVal} ${poolLPName} ($${Numeral(farmVal * poolLPVal).format('0.000')})* tokens has been withdrawn from *QuickSwap MAHA/ARTH Staking Program* by [${farmingUser}](${url})`
+    msg = `*${farmVal} ${poolLPName} ($${Numeral(farmVal * poolLPVal).format('0.000')})* tokens has been withdrawn from **${swapName} ${poolLPName} Staking Program** by [${farmingUser}](${url})`
   }
   if(operation == 'RewardPaid'){
     farmVal = format.toDisplayNumber(data.returnValues.reward)
     console.log('RewardPaid', farmVal, data.returnValues.reward)
-    msg = `*${farmVal} MAHA* tokens has been claimed as reward from *QuickSwap MAHA/ARTH Staking Program* by [${farmingUser}](${url})`
+    msg = `*${farmVal} MAHA* tokens has been claimed as reward from **${swapName} ${poolLPName} Staking Program** by [${farmingUser}](${url})`
   }
 
   let noOfTotalDots = Math.ceil((farmVal * poolLPVal) / 100)
@@ -227,6 +551,10 @@ New APR: **${apr}%**
 module.exports = {
   botMessage,
   farmingTelgramMsg,
-  farmingDiscordMsg
+  farmingDiscordMsg,
+  troveTelegramMsg,
+  troveDiscordMsg,
+  borrowOpTelegramMsg,
+  borrowOpDiscordMsg
 }
 

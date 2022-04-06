@@ -116,13 +116,13 @@ const mahaXBot = async() => {
         msgTemplate = `
 🚀  Governance is in swing...
 
-*${event.returnValues.value / 10**18} $(${(event.returnValues.value / 10**18) * mahaToUsdPrice}) MAHA* has been locked till *${moment(event.returnValues.locktime * 1000).format('DD MMM YYYY')}* by [${event.returnValues.provider}](https://polygonscan.com/address/${event.returnValues.provider})
+*${event.returnValues.value / 10**18} ($${(event.returnValues.value / 10**18) * mahaToUsdPrice}) MAHA* has been locked till *${moment(event.returnValues.locktime * 1000).format('DD MMM YYYY')}* by [${event.returnValues.provider}](https://polygonscan.com/address/${event.returnValues.provider})
 
 ${greenDots}
 
 *1 MAHA* = *$${mahaToUsdPrice}*
 *1 ETH* = *${ethToMahaPrice} MAHA*
-[MahaDAO](https://polygonscan.com/token/0xedd6ca8a4202d4a36611e2fff109648c4863ae19) *|* [📶 Tx Hash 📶 ](https://polygonscan.com/tx/${event.transactionHash})
+[MahaDAO](https://polygonscan.com/token/0xedd6ca8a4202d4a36611e2fff109648c4863ae19) | [📶 Tx Hash 📶 ](https://polygonscan.com/tx/${event.transactionHash})
 `
       }else if(event.returnValues.type == 3){
         msgTemplate = `
@@ -132,7 +132,7 @@ The locking period is extended till *${moment(event.returnValues.locktime * 1000
 
 *1 MAHA* = *$${mahaToUsdPrice}*
 *1 ETH* = *${ethToMahaPrice} MAHA*
-[MahaDAO](https://polygonscan.com/token/0xedd6ca8a4202d4a36611e2fff109648c4863ae19) *|* [📶 Tx Hash 📶 ](https://polygonscan.com/tx/${event.transactionHash})
+[MahaDAO](https://polygonscan.com/token/0xedd6ca8a4202d4a36611e2fff109648c4863ae19) | [📶 Tx Hash 📶 ](https://polygonscan.com/tx/${event.transactionHash})
         `
       }
       else{
@@ -146,11 +146,11 @@ The locking period is extended till *${moment(event.returnValues.locktime * 1000
         msgTemplate = `
 🚀  Governance is in swing...
 
-*${event.returnValues.value / 10**18} $(${(event.returnValues.value / 10**18) * mahaToUsdPrice}) MAHA* has been withdrawn by [${event.returnValues.provider}](https://polygonscan.com/address/${event.returnValues.provider})
+*${event.returnValues.value / 10**18} ($${(event.returnValues.value / 10**18) * mahaToUsdPrice}) MAHA* has been withdrawn by [${event.returnValues.provider}](https://polygonscan.com/address/${event.returnValues.provider})
 
 *1 MAHA* = *$${mahaToUsdPrice}*
 *1 ETH* = *${ethToMahaPrice} MAHA*
-[MahaDAO](https://polygonscan.com/token/0xedd6ca8a4202d4a36611e2fff109648c4863ae19) *|* [📶 Tx Hash 📶 ](https://polygonscan.com/tx/${event.transactionHash})
+[MahaDAO](https://polygonscan.com/token/0xedd6ca8a4202d4a36611e2fff109648c4863ae19) | [📶 Tx Hash 📶 ](https://polygonscan.com/tx/${event.transactionHash})
         `
       }
 

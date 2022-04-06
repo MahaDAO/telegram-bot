@@ -117,55 +117,31 @@ const farming = async() => {
         .on('connected', nr => console.log(`connected ${farm.chainName} ${cont.lpTokenName}`))
         .on('data', async(data) => {
           console.log('data', data)
-          let msgTemplate = 'Hello Investors'
-          let baseUrl = ''
-          if(farm.chainName == 'Polygon Mainnet') baseUrl = 'https://polygonscan.com'
-          if(farm.chainName == 'BSC Mainnet') baseUrl = 'https://bscscan.com'
+          let telegramMsg = ''
+          let discordMsg = ''
 
           if(data.event == 'Staked'){
-            // msgTemplate = `*${format.toDisplayNumber(data.returnValues.amount)} ${cont.lpTokenName}* tokens has been staked on *QuickSwap MAHA/ARTH Staking Program* by [${data.returnValues.user}](${baseUrl}/address/${data.returnValues.user})`
-            console.log('data', data.returnValues.amount)
-            let msg = await fn.farmingTelgramMsg(data, `${farm.chainName}`, cont.lpTokenName, 'Staked')
-            console.log('msg', msg)
-
-            bot.sendMessage(
-              process.env.CHAT_ID,
-              msg,
-              { parse_mode: "Markdown", disable_web_page_preview: true }
-            )
-            let discordMsg = await fn.farmingDiscordMsg(data, `${farm.chainName}`, cont.lpTokenName, 'Staked')
-            console.log('discordMsg', discordMsg)
-            channel.send({embeds: [discordMsg]})
+            telegramMsg = await fn.farmingTelgramMsg(data, `${farm.chainName}`, cont.lpTokenName, 'Staked')
+            discordMsg = await fn.farmingDiscordMsg(data, `${farm.chainName}`, cont.lpTokenName, 'Staked')
           }
+
           if(data.event == 'Withdrawn'){
-            console.log('if Withdrawn')
-            // msgTemplate = `*${format.toDisplayNumber(data.returnValues.amount)} ARTH/MAHA LP* tokens has been withdrawn from *QuickSwap MAHA/ARTH Staking Program* by [${data.returnValues.user}](${baseUrl}/address/${data.returnValues.user})`
-            let msg = await fn.farmingTelgramMsg(data, `${farm.chainName}`, cont.lpTokenName, 'Withdrawn')
-            console.log('msg', msg)
-            bot.sendMessage(
-              process.env.CHAT_ID,
-              msg,
-              { parse_mode: "Markdown", disable_web_page_preview: true }
-            )
-            let discordMsg = await fn.farmingDiscordMsg(data, `${farm.chainName}`, cont.lpTokenName,  'Withdrawn')
-            console.log('discordMsg', discordMsg)
-
-            channel.send({embeds: [discordMsg]})
+            telegramMsg = await fn.farmingTelgramMsg(data, `${farm.chainName}`, cont.lpTokenName, 'Withdrawn')
+            discordMsg = await fn.farmingDiscordMsg(data, `${farm.chainName}`, cont.lpTokenName, 'Withdrawn')
           }
+
           if(data.event == 'RewardPaid'){
-            console.log('if RewardPaid')
-            // msgTemplate = `*${format.toDisplayNumber(data.returnValues.reward)} MAHA tokens* has been claimed as reward from *QuickSwap MAHA/ARTH Staking Program* by [${data.returnValues.user}](${baseUrl}/address/${data.returnValues.user})`
-            let msg = await fn.farmingTelgramMsg(data, `${farm.chainName}`, cont.lpTokenName, 'RewardPaid')
-
-            bot.sendMessage(
-              process.env.CHAT_ID,
-              msg,
-              { parse_mode: "Markdown", disable_web_page_preview: true}
-            )
-            let discordMsg = await fn.farmingDiscordMsg(data, `${farm.chainName}`, cont.lpTokenName, 'RewardPaid')
-            channel.send({embeds: [discordMsg]})
-
+            telegramMsg = await fn.farmingTelgramMsg(data, `${farm.chainName}`, cont.lpTokenName, 'RewardPaid')
+            discordMsg = await fn.farmingDiscordMsg(data, `${farm.chainName}`, cont.lpTokenName, 'RewardPaid')
           }
+
+          bot.sendMessage(
+            process.env.CHAT_ID,
+            telegramMsg,
+            { parse_mode: "Markdown", disable_web_page_preview: true })
+
+          channel.send({embeds: [discordMsg]})
+
         })
         .on('changed', changed => console.log('changed', changed))
         .on('error', err => console.log('error farming', err))
