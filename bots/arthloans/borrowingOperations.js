@@ -1,5 +1,8 @@
 const Web3 = require('web3');
 const TelegramBot = require('node-telegram-bot-api');
+const {Client, Intents, MessageEmbed} = require('discord.js')
+const { REST } = require('@discordjs/rest');
+const { Routes } = require('discord-api-types/v9');
 // const twitter = require('twitter-lite');
 require('dotenv').config();
 // const rp = require('request-promise');
