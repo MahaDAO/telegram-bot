@@ -15,7 +15,7 @@
     "request-promise": "^4.2.6",
     "twitter-api-client": "^1.5.1",
     "twitter-lite": "^1.1.0",
-    "underscore": "^1.12.0",
+    "underscore": "^1.12.1",
     "web3": "^1.7.1",
     "web3-providers-ws": "^1.7.0"
   }
