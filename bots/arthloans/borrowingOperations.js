@@ -20,12 +20,12 @@ const commands = [{
   name: 'maha',
   description: 'Replies with DAO!'
 }];
-const rest = new REST({ version: '9' }).setToken(`${process.env.DISCORD_CLIENT_TOKEN}`);
+const rest = new REST({ version: '9' }).setToken(`${process.env.MAHA_DiscordClientToken}`);
 (async () => {
   try {
     console.log('Started refreshing application (/) commands.');
     await rest.put(
-      Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+      Routes.applicationGuildCommands(process.env.MAHA_DiscordClientId, process.env.MAHA_GuildId),
       { body: commands },
     );
     console.log('Successfully reloaded application (/) commands.');
@@ -53,7 +53,7 @@ let channel;
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  channel = client.channels.cache.get(`${process.env.DISCORD_CHANNEL_ID}`)
+  channel = client.channels.cache.get(`${process.env.MAHA_DiscordChannel}`)
 
 });
 
@@ -72,7 +72,7 @@ client.on('messageCreate', msg => {
   }
 });
 
-client.login(process.env.DISCORD_CLIENT_TOKEN); //login bot using token
+client.login(process.env.MAHA_DiscordClientToken); //login bot using token
 
 const borrowingContracts = [
   {
@@ -115,28 +115,8 @@ const borrowingContracts = [
 ]
 
 // For Create, Update, Close the loan
-const maticBorrowContracts = [process.env.Matic_Borrow_Weth, process.env.Matic_Borrow_Wdai, process.env.Matic_Borrow_Wmatic]
-const bscBorrowContracts = [process.env.Bsc_Borrow_Maha, process.env.Bsc_Borrow_Wbnb, process.env.Bsc_Borrow_Wbusd]
 
 const borrowingOperations = async() => {
-
-  // Testnet
-
-  const web3MaticTestBorrow = new Web3(`${process.env.TESTNET_MATIC}`)
-  const web3BscTestBorrow = new Web3(`${process.env.TESTNET_BSC}`)
-
-  // let bscTestMahaBorrowerOperationContract = '0xABc622cde0175a0E7700C3283c64Cd9D99aa07DF'
-  // let bscTestMahaTroveManagerContract = '0x7471466f0409aD3eaA8abE78bc1aE032fBccc618'
-
-  // var borrowerOperationsContract = new web3.eth.Contract(borrowerOperationsAbi, bscTestMahaBorrowerOperationContract)
-  // var troveManagerContract = new web3.eth.Contract(troveManagerAbi, bscTestMahaTroveManagerContract);
-
-  // Mainnet
-  // At a time only two token addressess get connected on a websocket
-
-  const web3MaticMain = new Web3(`${process.env.MAINNET_MATIC}`)
-  const web3BscMain = new Web3(`${process.env.MAINNET_BSC}`)
-
 
   borrowingContracts.map((borrowContract) => {
     borrowContract.contract.map((adrs) => {

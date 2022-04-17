@@ -548,6 +548,139 @@ New APR: **${apr}%**
     return exampleEmbed
 }
 
+const leverageTeleMsg = async(data, chain, lpName) => {
+  let chainLink = ''
+  let tvl = ''
+  let apr = ''
+  let msg = ''
+  let poolLPVal = 0
+  let swapName
+
+  let tvlApr = await constants.tvlAprFn()
+  let lpPoolValObj = await constants.poolTokenVal()
+
+  if(chain == 'Polygon Mainnet'){
+    chainLink = 'https://polygonscan.com'
+    mahaToken = '0xedd6ca8a4202d4a36611e2fff109648c4863ae19'
+    tvl = tvlApr.polygon.tvl
+    apr = tvlApr.polygon.apr
+    swapName = 'QuickSwap'
+  }
+  if(chain == 'BSC Mainnet'){
+    chainLink = 'https://bscscan.com'
+    mahaToken = '0xCE86F7fcD3B40791F63B86C3ea3B8B355Ce2685b'
+    tvl = tvlApr.bsc.tvl
+    apr = tvlApr.bsc.apr
+    swapName = 'PanCakeSwap'
+  }
+
+  let levVal = 1
+  let levUser = data.returnValues.who
+  let url = `${chainLink}/address/${levUser}`
+
+  if(data.event == 'PositionOpened'){
+    levVal = format.toDisplayNumber(data.returnValues.principalCollateral[0])
+    msg = `A position has been opened with the collateral of ${levVal} ${lpName} token by [${levUser}](${url})`
+  }
+  if(data.event == 'PositionClosed'){
+    // levVal = format.toDisplayNumber(data.returnValues.principalCollateral[0])
+    msg = `A position has been closed by [${levUser}](${url})`
+  }
+
+  let noOfTotalDots = Math.ceil(levVal / 100)
+  let dots = ''
+  for(let i = 0; i < noOfTotalDots; i++){
+    if(data.event == 'PositionOpened')
+      dots = '🟢 '  + dots;
+    if(data.event == 'PositionClosed')
+      dots = '🔴 '  + dots;
+  }
+
+  let msgToReturn = `
+🚀  Leverage is in swing...
+
+${msg}
+
+${dots}
+
+*1 MAHA* = *$${await constants.getMahaPrice()}*
+*1 ARTH* = *$${await constants.getArthToUSD()}*
+
+[📶 Transaction Hash 📶 ](${chainLink}/tx/${data.transactionHash})
+  `
+
+  return msgToReturn
+
+}
+
+const leverageDiscordMsg = async(data, chain, lpName) => {
+
+  let chainLink = ''
+  let tvl = ''
+  let apr = ''
+  let msg = ''
+  let poolLPVal = 0
+  let swapName
+
+  let tvlApr = await constants.tvlAprFn()
+  let lpPoolValObj = await constants.poolTokenVal()
+
+  if(chain == 'Polygon Mainnet'){
+    chainLink = 'https://polygonscan.com'
+    mahaToken = '0xedd6ca8a4202d4a36611e2fff109648c4863ae19'
+    tvl = tvlApr.polygon.tvl
+    apr = tvlApr.polygon.apr
+    swapName = 'QuickSwap'
+  }
+  if(chain == 'BSC Mainnet'){
+    chainLink = 'https://bscscan.com'
+    mahaToken = '0xCE86F7fcD3B40791F63B86C3ea3B8B355Ce2685b'
+    tvl = tvlApr.bsc.tvl
+    apr = tvlApr.bsc.apr
+    swapName = 'PanCakeSwap'
+  }
+
+  let levVal = 1
+  let levUser = data.returnValues.who
+  let url = `${chainLink}/address/${levUser}`
+
+  if(data.event == 'PositionOpened'){
+    levVal = format.toDisplayNumber(data.returnValues.principalCollateral[0])
+    msg = `A position has been opened with the collateral of ${levVal} ${lpName} token by [${levUser}](${url})`
+  }
+  if(data.event == 'PositionClosed'){
+    // levVal = format.toDisplayNumber(data.returnValues.principalCollateral[0])
+    msg = `A position has been closed by [${levUser}](${url})`
+  }
+
+  let noOfTotalDots = Math.ceil(levVal / 100)
+  let dots = ''
+  for(let i = 0; i < noOfTotalDots; i++){
+    if(data.event == 'PositionOpened')
+      dots = '🟢 '  + dots;
+    if(data.event == 'PositionClosed')
+      dots = '🔴 '  + dots;
+  }
+
+  let msgToReturn = `
+${msg}
+
+${dots}
+
+*1 MAHA* = *$${await constants.getMahaPrice()}*
+*1 ARTH* = *$${await constants.getArthToUSD()}*
+
+[📶 Transaction Hash 📶 ](${chainLink}/tx/${data.transactionHash})
+  `
+  const exampleEmbed = new MessageEmbed()
+    .setColor('#F07D55')
+    .setTitle('🚀  Leverage is in swing...')
+    .setDescription(msgToReturn)
+
+  return exampleEmbed
+
+}
+
 module.exports = {
   botMessage,
   farmingTelgramMsg,
@@ -555,6 +688,7 @@ module.exports = {
   troveTelegramMsg,
   troveDiscordMsg,
   borrowOpTelegramMsg,
-  borrowOpDiscordMsg
+  borrowOpDiscordMsg,
+  leverageTeleMsg,
+  leverageDiscordMsg
 }
-

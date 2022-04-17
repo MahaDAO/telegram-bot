@@ -4,24 +4,26 @@ const TelegramBot = require('node-telegram-bot-api');
 const {Client, Intents, MessageEmbed} = require('discord.js')
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
+const rp = require('request-promise');
 
 require('dotenv').config({path: '../../.env'});
 const leverageAbi = require('../../abi/ILeverageStrategy.json')
 const fn = require('../../utils/fn')
 const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN)
 const format = require('../../utils/formatValues');
-const constants = require('../../utils/constants')
+const constants = require('../../utils/constants');
+const formatValues = require('../../utils/formatValues');
 
 const commands = [{
   name: 'maha',
   description: 'Replies with DAO!'
 }];
-const rest = new REST({ version: '9' }).setToken(`${process.env.DISCORD_CLIENT_TOKEN}`);
+const rest = new REST({ version: '9' }).setToken(`${process.env.MAHA_DiscordClientToken}`);
 (async () => {
   try {
     console.log('Started refreshing application (/) commands.');
     await rest.put(
-      Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+      Routes.applicationGuildCommands(process.env.MAHA_DiscordClientId, process.env.MAHA_GuildId),
       { body: commands },
     );
     console.log('Successfully reloaded application (/) commands.');
@@ -49,7 +51,7 @@ let channel;
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  channel = client.channels.cache.get(`${process.env.DISCORD_CHANNEL_ID}`)
+  channel = client.channels.cache.get(`${process.env.MAHA_DiscordChannel}`)
 
 });
 
@@ -68,24 +70,60 @@ client.on('messageCreate', msg => {
   }
 });
 
-client.login(process.env.DISCORD_CLIENT_TOKEN); //login bot using token
+client.login(process.env.MAHA_DiscordClientToken); //login bot using token
+
 
 const leverageObj = [
+  // {
+  //   contract: '0x7b8b7f1a6e555f9c1e357b5ffe4879fe6e563e55',
+  //   chainWss: process.env.MAINNET_MATIC,
+  //   chainName: 'Polygon Mainnet'
+  // },
   {
-    contract: '0x7b8b7f1a6e555f9c1e357b5ffe4879fe6e563e55',
-    chainWss: process.env.TESTNET_MATIC,
-    chainName: 'Polygon Testnet'
+    contract: [
+      {
+        lpName: 'BUSD/USDC ApeSwap',
+        lpAdrs: '0x3F893bc356eC4932A1032588846F4c5e3BC670Dc'
+      },
+      {
+        lpName: 'BUSD/USDT ApeSwap',
+        lpAdrs: '0x78DE5b23734EEbF408CEe5c06E51827e03bCD98d'
+      }
+    ],
+    chainWss: process.env.MAINNET_BSC,
+    chainName: 'BSC Mainnet'
   }
 ]
 
-const leverage = () => {
+const leverage = async() => {
+
   leverageObj.map((lev) => {
-    console.log('events', new (new Web3(lev.chainWss)).eth.Contract(leverageAbi, lev.contract).events)
-    new (new Web3(lev.chainWss)).eth.Contract(leverageAbi, lev.contract).events.allEvents()
-    .on('connected', nr => console.log('connected', lev.chainName))
-    .on('data', (data) => {
-      console.log('data', data)
+
+    lev.contract.map((cont) => {
+
+      new (new Web3(lev.chainWss)).eth.Contract(leverageAbi, cont.lpAdrs).events.allEvents()
+      .on('connected', nr => console.log('connected', lev.chainName, cont.lpName))
+      .on('data', async(data) => {
+        console.log('data', data)
+        let telegramMsg = ''
+        let discordMsg = ''
+
+        if(data.event == 'PositionOpened' || data.event == 'PositionClosed'){
+          telegramMsg = await fn.leverageTeleMsg(data, lev.chainName, cont.lpName)
+          discordMsg = await fn.leverageDiscordMsg(data, lev.chainName, cont.lpName)
+        }
+
+        bot.sendMessage(
+          process.env.CHAT_ID,
+          telegramMsg,
+          { parse_mode: "Markdown", disable_web_page_preview: true })
+
+        channel.send({embeds: [discordMsg]})
+      })
+
     })
+
+
 
   })
 }

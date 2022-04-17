@@ -4,6 +4,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const {Client, Intents, MessageEmbed} = require('discord.js')
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
+const rp = require('request-promise');
 
 require('dotenv').config({path: '../../.env'});
 const farmingAbi = require('../../abi/BasicStaking.json')
@@ -17,12 +18,12 @@ const commands = [{
   name: 'maha',
   description: 'Replies with DAO!'
 }];
-const rest = new REST({ version: '9' }).setToken(`${process.env.DISCORD_CLIENT_TOKEN}`);
+const rest = new REST({ version: '9' }).setToken(`${process.env.MAHA_DiscordClientToken}`);
 (async () => {
   try {
     console.log('Started refreshing application (/) commands.');
     await rest.put(
-      Routes.applicationGuildCommands(process.env.CLIENT_ID, process.env.GUILD_ID),
+      Routes.applicationGuildCommands(process.env.MAHA_DiscordClientId, process.env.MAHA_GuildId),
       { body: commands },
     );
     console.log('Successfully reloaded application (/) commands.');
@@ -50,7 +51,7 @@ let channel;
 client.on('ready', () => {
   console.log(`Logged in as ${client.user.tag}!`);
 
-  channel = client.channels.cache.get(`${process.env.DISCORD_CHANNEL_ID}`)
+  channel = client.channels.cache.get(`${process.env.MAHA_DiscordChannel}`)
 
 });
 
@@ -69,7 +70,7 @@ client.on('messageCreate', msg => {
   }
 });
 
-client.login(process.env.DISCORD_CLIENT_TOKEN); //login bot using token
+client.login(process.env.MAHA_DiscordClientToken); //login bot using token
 
 const basicStaking = [
   {

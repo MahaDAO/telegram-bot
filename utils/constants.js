@@ -1,6 +1,7 @@
 const rp = require('request-promise');
 
 const getMahaPrice = async() => {
+
   let mahaToUsdPrice = await rp(`https://api.coingecko.com/api/v3/simple/price?ids=mahadao&vs_currencies=usd`);
   let mahaToUsd = Number(JSON.parse(mahaToUsdPrice)['mahadao']['usd']).toPrecision(4)
 
@@ -27,8 +28,8 @@ const tvlAprFn = async() => {
 
   let tvlAprObj = {
     bsc: {
-      tvl: data.chainSpecificData['56'].tvl.arthMaha.toLocaleString(),
-      apr: data.chainSpecificData['56'].apr.arthMaha.toLocaleString()
+      tvl: data.chainSpecificData['56'].tvl.arthMahaApe.toLocaleString(),
+      apr: data.chainSpecificData['56'].apr.arthMahaApe.toLocaleString()
     },
     polygon: {
       tvl: data.chainSpecificData['137'].tvl.arthMaha.toLocaleString(),
@@ -39,7 +40,11 @@ const tvlAprFn = async() => {
 }
 
 const poolTokenVal = async() => {
-  const data = JSON.parse(await rp('https://api.arthcoin.com/apy/lp'))
+  var options = {
+    method: 'POST',
+    uri: 'https://api.arthcoin.com/apy/lp',
+  };
+  const data = JSON.parse(await rp(options))
 
   return data
 }
